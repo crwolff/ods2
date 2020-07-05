@@ -3,8 +3,7 @@
 
 ## Credits
 
-Paul Nankervis
-Hunter Goatley
+Paul Nankervis / Hunter Goatley
 
-Original README(s) in aaareadme.txt and aaareadme.too
+Original README(s) in [aaareadme.txt](aaareadme.txt) and [aaareadme.too](aaareadme.too)
 
