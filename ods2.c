@@ -1,5 +1,4 @@
 #define MODULE_NAME	ODS2
-#define MODULE_IDENT	"V1.3"
 
 /*     Ods2.c v1.3   Mainline ODS2 program   */
 
@@ -60,10 +59,10 @@
 
 #ifdef VMS
 #ifdef __DECC
-#pragma module MODULE_NAME MODULE_IDENT
+#pragma module MODULE_NAME VERSION
 #else
 #ifdef vaxc
-#module MODULE_NAME MODULE_IDENT
+#module MODULE_NAME VERSION
 #endif /* vaxc */
 #endif /* __DECC */
 #endif /* VMS */
@@ -899,7 +898,7 @@ unsigned statis(int argc,char *argv[],int qualc,char *qualv[])
 
 unsigned help(int argc,char *argv[],int qualc,char *qualv[])
 {
-    printf("\nODS2 %s\n", MODULE_IDENT);
+    printf("\nODS2 %s\n", VERSION);
     printf(" Please send problems/comments to Paulnank@au1.ibm.com\n");
     printf(" Commands are:\n");
     printf("  copy        difference      directory     exit\n");
@@ -1099,7 +1098,7 @@ int main(int argc,char *argv[])
 #define STRSIZE 2048
     char str[STRSIZE];
     FILE *atfile = NULL;
-    printf(" ODS2 %s\n", MODULE_IDENT);
+    printf(" ODS2 %s\n", VERSION);
     while (1) {
         char *ptr;
         if (atfile != NULL) {
