@@ -75,7 +75,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-
+#include <sys/stat.h>
 
 #ifdef VMSIO
 #include <ssdef.h>
@@ -329,6 +329,27 @@ unsigned copy(int argc,char *argv[],int qualc,char *qualv[])
                     {
                         char *out = name,*inp = argv[2];
                         int dot = 0;
+                        if ((strncmp(inp,"[*]",3) == 0) && (nam.nam$b_dir > 0))
+                        {
+                            char *tmp = nam.nam$l_dir;
+                            int i;
+                            for(i=0;i<nam.nam$b_dir;i++)
+                            {
+                                if ((*tmp == '.') || (*tmp == ']'))
+                                {
+                                    *out = 0;
+                                    mkdir(name,0777);
+                                    *out++ = '/';
+                                }
+                                else if ( *tmp != '[' )
+                                {
+                                    *out++ = *tmp;
+                                }
+                                if ( *tmp++ == ']' )
+                                    break;
+                            }
+                            inp += 3;
+                        }
                         while (*inp != '\0') {
                             if (*inp == '*') {
                                 inp++;
