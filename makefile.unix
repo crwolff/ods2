@@ -1,11 +1,13 @@
 
 CCFLAGS = "-g"
 
-DEFS = "-DVERSION=\"v1.3\""
+DEFS = "-DVERSION=\"v1.4\""
 
 all : ods2
 
-ods2 : ods2.o rms.o direct.o update.o access.o device.o phyunix.o cache.o vmstime.o
+OBJS = ods2.o rms.o direct.o update.o access.o device.o phyunix.o cache.o vmstime.o
+
+ods2 : ${OBJS}
 	cc $(CCFLAGS) -oods2 ods2.o rms.o direct.o update.o access.o device.o phyunix.o cache.o vmstime.o
 
 vmstime.o : vmstime.c vmstime.h
@@ -34,3 +36,10 @@ rms.o : rms.c rms.h direct.h access.h fibdef.h descrip.h ssdef.h
 
 ods2.o : ods2.c ssdef.h descrip.h access.h rms.h
 	cc -c $(CCFLAGS) $(DEFS) ods2.c
+
+clean :
+	rm -f ${OBJS}
+
+clean_all :
+	rm -f ${OBJS} ods2
+

@@ -1,7 +1,7 @@
 
 CCFLAGS = "-Oxs"
 
-DEFS = "-DVERSION=\"v1.3\""
+DEFS = "-DVERSION=\"v1.4\""
 
 all : ods2
 
