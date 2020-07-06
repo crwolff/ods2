@@ -1097,6 +1097,8 @@ int main(int argc,char *argv[])
 #else
             printf("$> ");
             if (fgets(str,STRSIZE,stdin) == NULL) break;
+            ptr = strchr(str,'\n');
+            if (ptr != NULL) *ptr = '\0';
 #endif
         }
         ptr = str;
