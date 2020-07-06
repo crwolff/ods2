@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
 
@@ -47,16 +48,38 @@ void phyio_show(void)
 unsigned phyio_init(int devlen,char *devnam,unsigned *handle,struct phyio_info *info)
 {
     int vmsfd;
-    char *cp,devbuf[200];
+    char *cp,*devbuf;
+
     init_count++;
+    devbuf = (char *)malloc(devlen + strlen(DEV_PREFIX) + 5);
+    if (devbuf == NULL) return SS$_NOSUCHDEV;
     info->status = 0;           /* We don't know anything about this device! */
     info->sectors = 0;
     info->sectorsize = 0;
-    sprintf(devbuf,DEV_PREFIX,devnam);
+    sprintf(devbuf,"%s",devnam);
     cp = strchr(devbuf,':');
     if (cp != NULL) *cp = '\0';
+
+    /* try to open file without '/dev/' prefix */
     vmsfd = open(devbuf,O_RDWR);
     if (vmsfd < 0) vmsfd = open(devbuf,O_RDONLY);
+
+    if (vmsfd < 0)
+    {
+	/* try to open file with '/dev/' prefix */
+        sprintf(devbuf,DEV_PREFIX,devnam);
+        cp = strchr(devbuf,':');
+        if (cp != NULL) *cp = '\0';
+        vmsfd = open(devbuf,O_RDWR);
+        if (vmsfd < 0) vmsfd = open(devbuf,O_RDONLY);
+    }
+    else
+    {
+	/* remove '.' from filename to prevent parsing problems */
+	while ((cp = strchr(devnam,'.')) != NULL)
+	    *cp = '$';
+    }
+    free(devbuf);
     if (vmsfd < 0) return SS$_NOSUCHDEV;
     *handle = vmsfd;
     return SS$_NORMAL;
