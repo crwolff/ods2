@@ -294,7 +294,7 @@ unsigned insert_ent(struct FCB * fcb,unsigned eofblk,unsigned curblk,
         struct VIOC *newvioc;
         unsigned newblk = eofblk + 1;
         direct_splits++;
-        printf("Splitting record... %d %d\n",dr,de);
+        printf("Splitting record... %p %p\n",dr,de);
         if (newblk > fcb->hiblock) {
             printf("I can't extend a directory yet!!\n");
             exit(0);
@@ -353,7 +353,7 @@ unsigned insert_ent(struct FCB * fcb,unsigned eofblk,unsigned curblk,
             register unsigned reclen = (dr->dir$namecount +
                                         sizeof(struct dir$rec)) & ~1;
             register struct dir$rec *nbr = (struct dir$rec *) newbuf;
-            printf("Super split %d %d\n",dr,de);
+            printf("Super split %p %p\n",dr,de);
             memcpy(newbuf,buffer,reclen);
             memcpy(newbuf + reclen,de,((char *) nr - (char *) de) + 2);
             nbr->dir$size = VMSWORD(reclen + ((char *) nr - (char *) de) - 2);

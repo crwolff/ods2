@@ -315,7 +315,7 @@ unsigned update_addhead(struct VCB *vcb,char *filename,struct fiddef *back,
 
     sts = update_findhead(vcbdev,&head_no,vioc,&head,idxblk);
     if (!(sts & 1)) return sts;
-    printf("Header %d index %d rvn %d\n",head_no,idxblk,rvn);
+    printf("Header %d index %d rvn %d\n",head_no,*idxblk,rvn);
     fid->fid$w_num = head_no;
     fid->fid$w_seq = ++head->fh2$w_fid.fid$w_seq;
     if (fid->fid$w_seq == 0) fid->fid$w_seq = 1;

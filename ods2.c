@@ -1075,7 +1075,8 @@ char *getcmd(char *inp, char *prompt)
 
 int main(int argc,char *argv[])
 {
-    char str[2048];
+#define STRSIZE 2048
+    char str[STRSIZE];
     FILE *atfile = NULL;
     printf(" ODS2 %s\n", MODULE_IDENT);
     while (1) {
@@ -1095,7 +1096,7 @@ int main(int argc,char *argv[])
 	    if (getcmd (str, "$> ") == NULL) break;
 #else
             printf("$> ");
-            if (gets(str) == NULL) break;
+            if (fgets(str,STRSIZE,stdin) == NULL) break;
 #endif
         }
         ptr = str;
