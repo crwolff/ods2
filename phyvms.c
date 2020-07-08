@@ -148,6 +148,5 @@ unsigned phyio_write(unsigned handle,unsigned block,unsigned length,char *buffer
     printf("Phyio write block: %d from %x (%d bytes)\n",block,buffer,length);
 #endif
     write_count++;
-    printf("Phyio write block: %d from %x (%d bytes)\n",block,buffer,length);
     return sys$qiow(1,handle,IO$_WRITELBLK,NULL,0,0,buffer,length,block,0,0,0);
 }
