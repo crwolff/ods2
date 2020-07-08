@@ -37,6 +37,97 @@
 unsigned init_count = 0;
 unsigned read_count = 0;
 unsigned write_count = 0;
+unsigned SCacheEna = 1;
+
+#define SCACHE_BLKS 256
+#define SCACHE_BSZ 512
+struct {
+    unsigned sect;
+    unsigned age;
+    char *buff;
+} SCache[SCACHE_BLKS][4];
+unsigned SCacheTime = 0;
+
+void scache_init(void)
+{
+    for(int i=0;i<SCACHE_BLKS;i++) {
+	for(int j=0;j<4;j++) {
+	    SCache[i][j].sect = 0xFFFFFFFF;
+	    SCache[i][j].age = 0;
+	    SCache[i][j].buff = NULL;
+	}
+    }
+}
+
+
+unsigned scache_read(unsigned block,unsigned length,char *buffer)
+{
+    unsigned tblk;
+    unsigned tlen;
+    unsigned seg;
+    unsigned flag;
+
+    SCacheTime++;
+    for(tblk = block, tlen = length; tlen > 0; tblk++, tlen-=SCACHE_BSZ) {
+	seg = block & (SCACHE_BLKS-1);
+	flag = 0;
+	for(int i=0;i<4;i++) {
+	    if (SCache[seg][i].sect == block) {
+		SCache[seg][i].age = SCacheTime;
+		memcpy(buffer, SCache[seg][i].buff, SCACHE_BSZ);
+		buffer += SCACHE_BSZ;
+		flag = 1;
+		break;
+	    }
+	}
+	if (flag == 0) {
+	    return 0;	// Block not found
+	}
+    }
+    return 1;	// All data in cache
+}
+
+
+void scache_write(unsigned block,unsigned length,char *buffer)
+{
+    unsigned tblk;
+    unsigned tlen;
+    unsigned seg;
+    unsigned flag;
+    unsigned minage;
+    unsigned mindex;
+
+    if (SCacheEna == 0) return;
+    for(tblk = block, tlen = length; tlen > 0; tblk++, tlen-=SCACHE_BSZ) {
+	seg = block & (SCACHE_BLKS-1);
+	// Find in cache or oldest slot
+	for(int i=0;i<4;i++) {
+	    if (SCache[seg][i].sect == block) {
+		minage = SCache[seg][i].age;
+		mindex = i;
+		break;		// Found, overwrite this slot
+	    }
+	    if ((i==0) || (SCache[seg][i].age < minage)) {
+		minage = SCache[seg][i].age;
+		mindex = i;	// Else overwrite the oldest slot
+	    }
+	}
+	// Alloc buffer if needed
+	if ( SCache[seg][mindex].buff == NULL ) {
+	    SCache[seg][mindex].buff = malloc(SCACHE_BSZ);
+	}
+	if ( SCache[seg][mindex].buff == NULL ) {
+            perror("No memory for sector cache");
+	    return;
+	}
+	// Update slot
+	SCache[seg][mindex].sect == block;
+	SCache[seg][mindex].age = SCacheTime;
+	memcpy(SCache[seg][mindex].buff, buffer, SCACHE_BSZ);
+	buffer += SCACHE_BSZ;
+    }
+}
+
 
 void phyio_show(void)
 {
@@ -50,6 +141,7 @@ unsigned phyio_init(int devlen,char *devnam,unsigned *handle,struct phyio_info *
     int vmsfd;
     char *cp,*devbuf;
 
+    scache_init();
     init_count++;
     devbuf = (char *)malloc(devlen + strlen(DEV_PREFIX) + 5);
     if (devbuf == NULL) return SS$_NOSUCHDEV;
@@ -88,6 +180,7 @@ unsigned phyio_init(int devlen,char *devnam,unsigned *handle,struct phyio_info *
 
 unsigned phyio_close(unsigned handle)
 {
+    scache_init();
     close(handle);
     return SS$_NORMAL;
 }
@@ -97,9 +190,12 @@ unsigned phyio_read(unsigned handle,unsigned block,unsigned length,char *buffer)
 {
     int res;
 #ifdef DEBUG
-    printf("Phyio read block: %d into %x (%d bytes)\n",block,buffer,length);
+    printf("Phyio read block: %d into %p (%d bytes)\n",block,buffer,length);
 #endif
     read_count++;
+    if (scache_read(block,length,buffer)) {
+	return SS$_NORMAL;
+    }
     if ((res = lseek(handle,block*512,0)) < 0) {
         perror("lseek ");
 	printf("lseek failed %d\n",res);
@@ -110,6 +206,7 @@ unsigned phyio_read(unsigned handle,unsigned block,unsigned length,char *buffer)
 	printf("read failed %d\n",res);
         return SS$_PARITY;
     }
+    scache_write(block,length,buffer);
     return SS$_NORMAL;
 }
 

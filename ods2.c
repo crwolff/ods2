@@ -104,6 +104,7 @@
 #include "descrip.h"
 #include "access.h"
 #include "rms.h"
+#include "phyio.h"
 #endif
 
 #define PRINT_ATTR (FAB$M_CR | FAB$M_PRN | FAB$M_FTN)
@@ -389,6 +390,7 @@ unsigned copy(int argc,char *argv[],int qualc,char *qualv[])
                         filecount++;
                         rab.rab$l_ubf = rec;
                         rab.rab$w_usz = MAXREC;
+                        SCacheEna = 0;
                         while ((sts = sys_get(&rab)) & 1) {
                             unsigned rsz = rab.rab$w_rsz;
                             if ((options & 1) == 0 &&
@@ -401,6 +403,7 @@ unsigned copy(int argc,char *argv[],int qualc,char *qualv[])
                                 break;
                             }
                         }
+                        SCacheEna = 1;
                         if (fclose(tof)) {
                             printf("%%COPY-F- fclose error!!\n");
                             perror("-COPY-F-ERR ");

@@ -454,6 +454,7 @@ unsigned phy_putsect(unsigned chan,unsigned sector)
 unsigned init_count = 0;        /* Some counters so we can report */
 unsigned read_count = 0;        /* How often we get called */
 unsigned write_count = 0;
+unsigned SCacheEna = 0;
 
 void phyio_show(void)
 {

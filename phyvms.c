@@ -53,6 +53,7 @@ unsigned sys$dassgn();
 unsigned init_count = 0;
 unsigned read_count = 0;
 unsigned write_count = 0;
+unsigned SCacheEna = 0;
 
 void phyio_show(void)
 {

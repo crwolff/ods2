@@ -42,3 +42,4 @@ void phyio_show(void);
 unsigned phyio_init(int devlen,char *devnam,unsigned *handle,struct phyio_info *info);
 unsigned phyio_read(unsigned handle,unsigned block,unsigned length,char *buffer);
 unsigned phyio_write(unsigned handle,unsigned block,unsigned length,char *buffer);
+extern unsigned SCacheEna;
