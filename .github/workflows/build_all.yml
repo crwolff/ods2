@@ -1,0 +1,51 @@
+name: Development Build
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  BuildLinux:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build
+        run: |
+          make -f makefile.unix
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LinAssets
+          path: |
+              ods2
+          retention-days: 2
+
+  UpdateAssets:
+    if: ${{ github.repository_owner == 'crwolff' && github.event_name == 'push' }}
+    needs: [BuildLinux]
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Upload latest pre-release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Development Build"
+          files: |
+            LinAssets/ods2
+            README.md
+
